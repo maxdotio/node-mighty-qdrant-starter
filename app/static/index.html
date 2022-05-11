@@ -1,0 +1,88 @@
+<html>
+<head>
+    <title>Ask Outdoors - MAX.IO</title>
+
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="http://beta.max.io/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://beta.max.io/css/main-grey.css">
+    <link rel="icon" type="image/x-icon" href="http://beta.max.io/logo/favicon.ico">
+
+    <style>
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            * {
+                background-color: #000!important;
+                color: #ded!important;
+            }
+        }        
+    </style>
+
+</head>
+<body>
+    
+    <div class="section section-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <h1><img src="http://beta.max.io/logo/logo.png" alt="Logo" height=60> Ask Outdoors</h1>
+                </div>
+                <div class="col-md-6 col-sm-12" style="margin-top:16px;text-align:right;">
+                    <form method=GET action="/" id="searchform">
+                        <input type="text" name="search" id="search" size=35 placeholder="Ask a question" /><input type="submit" value="🔎" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="container" id="results">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function(){
+            function result(r) {
+                let Id = r.payload.Id;
+                let site = r.payload.site;
+                let text = r.payload.text.replace(/[\n]/g,"<br/>");
+                let Question = r.payload.Question;
+                let username = r.payload.OwnerDisplayName;
+                let userid = r.payload.OwnerUserId;
+                let user = userid||username||"";
+		/*
+                let Id = r.payload.Id.value[0];
+                let site = r.payload.site.value[0];
+                let text = r.payload.text.value[0].replace(/[\n]/g,"<br/>");
+                let Question = r.payload.Question.value[0];
+                let username = r.payload.OwnerDisplayName&&r.payload.OwnerDisplayName.value[0];
+                let userid = r.payload.OwnerUserId&&r.payload.OwnerUserId.value[0];
+                let user = userid||username||"";
+                */
+                return `
+                    <div class="row blog-post">
+                        <div class="col-sm-12">
+                            <h4><a href="https://${site}.stackexchange.com/a/${Id}">${Question}</a> <em>(${r.score})</em></h4>
+                            ${text}
+                            <p>
+                                <hr border=1/>
+                                <a href="https://${site}.stackexchange.com/a/${Id}">https://${site}.stackexchange.com/a/${Id}</a> by ${user}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function showresults(res) {
+                console.log(res);
+                var html = res.map(r=>result(r)).join('\n');
+                document.getElementById("results").innerHTML = html;
+            }
+
+            var query = new URLSearchParams(window.location.search);
+            if (query.has("search")) {
+                var text = query.get("search");
+                document.getElementById("search").value = text;
+                fetch("/search?search="+encodeURI(text)).then(r=>r.json()).then(d=>showresults(d));
+            }
+        })();
+    </script>
+</body>
+</html>

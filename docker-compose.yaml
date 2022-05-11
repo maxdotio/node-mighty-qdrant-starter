@@ -1,0 +1,56 @@
+version: '3'
+services:
+  mighty1:
+    build: mighty/.
+    container_name: mighty1
+    environment:
+      - "MIGHTY_PORT=5050"
+    expose:
+      - 5050
+    ports:
+      - 5050:5050
+    networks:
+      - mqsnet
+
+  mighty2:
+    build: mighty/.
+    container_name: mighty2
+    environment:
+      - "MIGHTY_PORT=5051"
+    expose:
+      - 5051
+    ports:
+      - 5051:5051
+    networks:
+      - mqsnet
+
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    volumes:
+      - qdrantstorage:/qdrant/storage
+    ports:
+      - "6333:6333"
+    networks:
+      - mqsnet
+
+  search:
+    build: app/.
+    container_name: search
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    networks:
+      - mqsnet
+    depends_on:
+      - mighty1
+      - mighty2
+      - qdrant
+    
+volumes:
+  qdrantstorage:
+    driver: local
+
+networks:
+  mqsnet:
