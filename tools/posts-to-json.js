@@ -10,6 +10,7 @@ import { program } from "commander";
 program
   .option('-i, --infile <string>')
   .option('-o, --outfile <string>')
+  .option('-s, --site <string>')
   .parse();
 
 const options = program.opts();
@@ -23,6 +24,13 @@ if (!options.outfile) {
     console.error("You must specify the outfile with a valid json filename!")
     process.exit(1);
 }
+
+if (!options.site) {
+    console.error("You must specify the site name!")
+    process.exit(1);
+}
+
+const site = options.site;
 
 const keys = {
     "Id": "int",
@@ -144,15 +152,27 @@ function get_paragraphs(doc) {
     return texts;
 }
 
-function get_document(doc) {
+function get_document(questions,doc) {
     let paragraphs = get_paragraphs(doc);
     let title = questions[doc.ParentId].Title;
+    let username = doc.OwnerDisplayName;
+    let userid = doc.OwnerUserId;
+
+    //For inference
     doc.Paragraphs = paragraphs;
     doc.Entailed = paragraphs.map(p=>title + ' ' + p);
     doc.Context = stripHtml(doc.Body).result;
     doc.Question = title;
     doc.IsAccepted = (questions[doc.ParentId].AcceptedAnswerId==doc.Id?1:0);
-    return doc;    
+
+    //For display
+    doc.docid = doc.Id;
+    doc.url = `https://${site}.stackexchange.com/a/${doc.Id}`;
+    doc.author = userid||username||"anonymous";
+    doc.published = doc.CreationDate;
+    doc.title = title;
+
+    return doc;
 }
 
 //Parses the xml2js results into well-typed JSON objects
@@ -163,9 +183,9 @@ function get_documents(result) {
     let questions = objects.questions;
     let documents = [];
     for(let i=0;i<records.length;i++) {
-        let doc = records[i];
-        if (doc.PostTypeId == 2 && doc.Score>0 && questions[doc.ParentId]) {
-            let doc = get_document(doc);
+        let rec = records[i];
+        if (rec.PostTypeId == 2 && rec.Score>0 && questions[rec.ParentId]) {
+            let doc = get_document(questions,rec);
             documents.push(JSON.stringify(doc));
         }
     }

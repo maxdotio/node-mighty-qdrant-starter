@@ -45,19 +45,19 @@ const schema = {
 //Make a new collection
 async function create_collection(DELETE) {
 
-	let exists_result = await qdrant.get_collection(name);
-	let exists = exists_result.response.result?true:false;
+    let exists_result = await qdrant.get_collection(name);
+    let exists = exists_result.response.result?true:false;
 
-	if (DELETE && exists) {
-		let delete_result = await qdrant.delete_collection(name);
-		console.log('Collection Deleted')
-		exists = false;
-	}
-	
-	if (exists_result.err || !exists) {
-	    let create_result = await qdrant.create_collection(name,schema);
-	    console.log('Collection Created');
-	}
+    if (DELETE && exists) {
+        let delete_result = await qdrant.delete_collection(name);
+        console.log('Collection Deleted')
+        exists = false;
+    }
+    
+    if (exists_result.err || !exists) {
+        let create_result = await qdrant.create_collection(name,schema);
+        console.log('Collection Created');
+    }
 }
 
 function get_files(path) {
@@ -74,60 +74,58 @@ function get_files(path) {
 }
 
 function get_documents(files,ignore) {
-	let payloads = [];
-	let documents = [];
+    let payloads = [];
+    let documents = [];
 
-	let id = 0;
-	for (var i=0;i<files.length;i++) {
-	    let doc = JSON.parse(fs.readFileSync(files[i].filename,"utf-8"));
-	    if (doc && doc && doc.vectors && doc.vectors.length) {
+    let id = 0;
+    for (var i=0;i<files.length;i++) {
+        let doc = JSON.parse(fs.readFileSync(files[i].filename,"utf-8"));
+        if (doc && doc && doc.vectors && doc.vectors.length) {
 
-	    	//Qdrant doesn't accept true/false - convert to an int.
-	    	doc.IsAccepted = doc.IsAccepted?1:0;
+            //Qdrant doesn't accept true/false - convert to an int.
+            doc.IsAccepted = doc.IsAccepted?1:0;
 
-			//Construct the metadata parent for all sub-points.
-			let metadata = {};
-			for(var key in doc) {
-				if (doc.hasOwnProperty(key) && (ignore.indexOf(key.toLowerCase())<0)) {
-					metadata[key] = doc[key];
-				}
-			}
+            //Construct the metadata parent for all sub-points.
+            let metadata = {};
+            for(var key in doc) {
+                if (doc.hasOwnProperty(key) && (ignore.indexOf(key.toLowerCase())<0)) {
+                    metadata[key] = doc[key];
+                }
+            }
 
-	    	//For each vector and text pair, create a Qdrant point that we will eventually send to the search engine
-	        for(var j=0;j<doc.vectors.length;j++) {
-	            let vec = doc.vectors[j];
-	            let txt = doc.texts[j];
-	            if (vec.length) {
-	            	//Each document body might have been split up if it was long.
-	            	//We'll create a separate point for each part of the vectorized content.
-	                for(var v=0;v<vec.length;v++) {
-	                    let vector = vec[v];
-	                    let text = txt[v];
-	                    let docid = uuidv4();
+            //For each vector and text pair, create a Qdrant point that we will eventually send to the search engine
+            for(var j=0;j<doc.vectors.length;j++) {
+                let vec = doc.vectors[j];
+                let txt = doc.texts[j];
+                if (vec.length) {
+                    //Each document body might have been split up if it was long.
+                    //We'll create a separate point for each part of the vectorized content.
+                    for(var v=0;v<vec.length;v++) {
+                        let vector = vec[v];
+                        let text = txt[v];
+                        let docid = uuidv4();
 
-	                    //Clone the doc metadata into payload and add point-specific data
-	                    let payload = JSON.parse(JSON.stringify(metadata));
-	                    payload.text = text;
-	                    payload.site = site;
+                        let payload = JSON.parse(JSON.stringify(metadata));
+                        payload.text = text.replace(/[\n]/g,"<br/>");
+                        payload.site = site;
 
+                        //Add it to the main list to be batched later
+                        documents.push({
+                            "id":docid,
+                            "vector":vector,
+                            "payload":payload
+                        });
 
-	                    //Add it to the main list to be batched later
-	                    documents.push({
-	                        "id":docid,
-	                        "vector":vector,
-	                        "payload":payload
-	                    });
+                        //IMPORTANT - this is the Qdrant point ID and may change if the file order changes!
+                        id++;
+                    }
+                }
+                
+            }
+        }
+    }
 
-	                    //IMPORTANT - this is the Qdrant point ID and may change if the file order changes!
-	                    id++;
-	                }
-	            }
-	            
-	        }
-	    }
-	}
-
-	return documents;
+    return documents;
 }
 
 

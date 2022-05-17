@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Ask Outdoors - MAX.IO</title>
+    <title>Mighty Starter - MAX.IO</title>
 
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="http://beta.max.io/css/bootstrap.min.css">
@@ -8,13 +8,19 @@
     <link rel="icon" type="image/x-icon" href="http://beta.max.io/logo/favicon.ico">
 
     <style>
+
+        .search-bar {
+            margin-top:16px;
+            text-align:right;
+        }
+
         /* Dark mode */
         @media (prefers-color-scheme: dark) {
             * {
                 background-color: #000!important;
                 color: #ded!important;
             }
-        }        
+        }
     </style>
 
 </head>
@@ -24,11 +30,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
-                    <h1><img src="http://beta.max.io/logo/logo.png" alt="Logo" height=60> Ask Outdoors</h1>
+                    <h1><img src="http://beta.max.io/logo/logo.png" alt="Logo" height=60> Mighty Starter</h1>
                 </div>
-                <div class="col-md-6 col-sm-12" style="margin-top:16px;text-align:right;">
+                <div class="col-md-6 col-sm-12" class="search-bar">
                     <form method=GET action="/" id="searchform">
-                        <input type="text" name="search" id="search" size=35 placeholder="Ask a question" /><input type="submit" value="🔎" />
+                        <input type="text" name="search" id="search" size=35 placeholder="search" /><input type="submit" value="🔎" />
                     </form>
                 </div>
             </div>
@@ -40,34 +46,29 @@
     <script type="text/javascript">
         (function(){
             function result(r) {
-                let Id = r.payload.Id;
-                let site = r.payload.site;
-                let text = r.payload.text.replace(/[\n]/g,"<br/>");
-                let Question = r.payload.Question;
-                let username = r.payload.OwnerDisplayName;
-                let userid = r.payload.OwnerUserId;
-                let user = userid||username||"";
-		/*
-                let Id = r.payload.Id.value[0];
-                let site = r.payload.site.value[0];
-                let text = r.payload.text.value[0].replace(/[\n]/g,"<br/>");
-                let Question = r.payload.Question.value[0];
-                let username = r.payload.OwnerDisplayName&&r.payload.OwnerDisplayName.value[0];
-                let userid = r.payload.OwnerUserId&&r.payload.OwnerUserId.value[0];
-                let user = userid||username||"";
-                */
+                let doc = r.payload;
+                let text = doc.text.replace(/[\n]/g,"<br/>");
                 return `
                     <div class="row blog-post">
                         <div class="col-sm-12">
-                            <h4><a href="https://${site}.stackexchange.com/a/${Id}">${Question}</a> <em>(${r.score})</em></h4>
+                            <h4><a href="${doc.url}">${doc.title}</a> <em>(${r.score})</em></h4>
                             ${text}
                             <p>
                                 <hr border=1/>
-                                <a href="https://${site}.stackexchange.com/a/${Id}">https://${site}.stackexchange.com/a/${Id}</a> by ${user}
+                                <a href="${doc.url}">${doc.url}</a> by ${doc.author||"anonymous"} on ${doc.published}
                             </p>
                         </div>
                     </div>
                 `;
+            }
+
+            function showerror(err) {
+                document.getElementById("results").innerHTML = `
+                    <div class="row blog-post">
+                        <div class="col-sm-12">
+                            <pre>${err.toString()}</pre>
+                        </div>
+                    </div>`;
             }
 
             function showresults(res) {
@@ -80,7 +81,7 @@
             if (query.has("search")) {
                 var text = query.get("search");
                 document.getElementById("search").value = text;
-                fetch("/search?search="+encodeURI(text)).then(r=>r.json()).then(d=>showresults(d));
+                fetch("/search?search="+encodeURI(text)).then(r=>r.json()).then(d=>showresults(d)).catch(err=>showerror(err));
             }
         })();
     </script>
