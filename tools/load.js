@@ -13,24 +13,38 @@ const qdrant = new Qdrant("http://localhost:6333/");
 
 program
   .option('-f, --files <string>')
-  .option('-s, --site <string>')
+  .option('-s, --sitemap <string>')
+  .option('-n, --name <string>')
   .parse();
 
 const options = program.opts();
 
-if (!options.files) {
-    console.error("You must specify the path to the vector files!")
-    process.exit(1);
+function clean_filename(filename) {
+    return filename.replace(/[:\/\.]+/g,'_')
 }
 
-if (!options.site) {
+let vector_files = null;
+
+if (!options.files) {
+    if (!options.sitemap) {
+        console.error("You must specify the path to the vector files OR a sitemap.xml url!")
+        program.help();
+        process.exit(1);
+    } else {
+        vector_files = `vectors/${clean_filename(options.sitemap)}/`;
+    }
+} else {
+    vector_files = options.files;
+}
+
+if (!options.name) {
     console.error("You must specify the site name!")
+    program.help();
     process.exit(1);
 }
 
 //Globals
-const vector_files = options.files; //"vectors/outdoors_posts.json/";
-const site = options.site //"outdoors";
+const site = options.name //"outdoors";
 const ignore_fields = ["vectors","texts","entailed","paragraphs","context","body"];
 const batch_size = 10;
 
@@ -142,7 +156,3 @@ for(var p=0;p<documents.length;p+=batch_size) {
     let response = await qdrant.upload_points(name,batch);
     bar.tick();
 }
-
-//Save the payloads to be used at query time.
-//let outdoors_answers_payloads = "["+payloads.join(",\n")+"]";
-//fs.writeFileSync("data/outdoors_answers_payloads.json",outdoors_answers_payloads,"utf-8");

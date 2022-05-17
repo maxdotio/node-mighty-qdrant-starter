@@ -1,5 +1,5 @@
 //
-// Converts a StackExchange 'Posts.xml' file into a 'posts.json' file
+// Converts a StackExchange 'Posts.xml' file into a 'posts.json' file ready for Mighty
 //
 
 import fs from "fs";
@@ -17,11 +17,13 @@ const options = program.opts();
 
 if (!options.infile) {
     console.error("You must specify the infile with a valid Posts.xml file!")
+    program.help()
     process.exit(1);
 }
 
 if (!options.outfile) {
     console.error("You must specify the outfile with a valid json filename!")
+    program.help()
     process.exit(1);
 }
 
