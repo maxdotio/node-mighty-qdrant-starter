@@ -20,7 +20,7 @@ program
 const options = program.opts();
 
 function clean_filename(filename) {
-    return filename.replace(/[:\/\.]+/g,'_')
+    return filename.replace(/[:\/]+/g,'_')
 }
 
 let vector_files = null;
