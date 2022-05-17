@@ -43,6 +43,6 @@ It's also possible to scrape and index any website that has a sitemap.xml file a
 
 # How fast is it?
 
-Once indexed and running, the search is very fast.  Requests return on average in about 50ms on a recent laptop or 
+Once indexed and running, the search is very fast. Requests return on average in about 20 to 50ms on a recent laptop.
 
 Inference can take a while, but can be accelerated by using a Mighty cluster and mighty-batch.  See this post for more details: https://max.io/blog/encoding-the-federal-register.html 
