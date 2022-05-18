@@ -1,6 +1,6 @@
 # Mighty Starter
 
-<img src="assets/logo.png" height="128" /> + <img src="assets/logo.png" height="128" />
+<img src="assets/logo.png" height="128" /> + <img src="assets/qdrant.png" height="128" />
 
 This project provides a complete and working semantic search application, using [Mighty Inference Server](https://max.io), [Qdrant Vector Search](https://qdrant.tech), and an example Node.js express application.
 
