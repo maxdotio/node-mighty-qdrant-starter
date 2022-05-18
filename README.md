@@ -18,9 +18,9 @@ A vector search project involves understanding and tuning at all layers of the f
 - Search UI and API
 - Docker composition
 
-This project was created as a starter kit for all of the above, and provides a forkable Docker compose that you can quickly adapt to your own needs quickly.
+This application was created as a starter kit for all of the above, and provides a forkable Docker compose that you can quickly adapt to your own needs quickly.
 
-You can use it to scrape a website and have a complete demo up and running in minutes, or use the provided example content from https://outdoors.stackexchange.com (CC BY 4.0).
+You can use it to scrape a website's sitemap and have a complete search application up and running in minutes, or use the provided example content from https://outdoors.stackexchange.com (CC BY 4.0).
 
 # How to use it
 
@@ -28,7 +28,9 @@ You can use it to scrape a website and have a complete demo up and running in mi
 
 You'll need docker and a recent version of node.js (tested on v16).
 
-N.B. there is zero Python required! The entire stack runs on Node and Rust technologies, and is very lightweight and fast.
+There is zero Python required! The entire stack runs on Node and Rust technologies, and is very lightweight and fast.
+
+_The project has been tested and works well on Linux and Mac Intel. Mac M1 support is in development._
 
 ## Installation
 
@@ -42,6 +44,14 @@ With the docker systems running, you can infer and index the outdoors content by
 
 It's also possible to scrape and index any website that has a sitemap.xml file available.  Simply run the following:
 `./website.sh [name] [https://example.com/sitemap.xml]` (where `[name]` is any name you give and replace the example sitemap with your own.
+
+# What's inside?
+
+- Qdrant is used as the vector search engine
+- Mighty Inference Server is used for inference with the sentence-transformers model https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1
+- Node.js and Express form the basic Search UI and API
+- mighty-batch is used for text processing and ETL
+- some simple scripts (index.sh, website.sh, tools/load.js) to orchestrate scraping and loading
 
 # How fast is it?
 
