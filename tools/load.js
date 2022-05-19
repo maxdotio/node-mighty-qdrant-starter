@@ -148,7 +148,7 @@ function get_documents(files,ignore) {
 
 
 //Create the collection!
-await create_collection(true);
+await create_collection(false);
 
 //Get and transform the files into Qdrant load-able points.
 let files = get_files(vector_files);
