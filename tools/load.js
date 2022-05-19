@@ -53,7 +53,11 @@ const name = "ask_life";
 const schema = {
     "name":name,
     "vector_size": 384,
-    "distance": "Cosine"
+    "distance": "Cosine",
+    "hnsw_config": {
+        "ef_construct":512,
+        "m":32
+    }
 };
 
 //Make a new collection
@@ -144,7 +148,7 @@ function get_documents(files,ignore) {
 
 
 //Create the collection!
-await create_collection(false);
+await create_collection(true);
 
 //Get and transform the files into Qdrant load-able points.
 let files = get_files(vector_files);
