@@ -20,8 +20,8 @@ then
     npm install -g mighty-batch
     cd tools
     npm install
-    cd ..    
+    cd ..
 fi
 
-mighty-batch --threads 1 --workers 1 --host mighty1 --sitemap $2 --property text
+mighty-batch --threads 1 --workers 2 --hosts http://mighty1:5050,http://mighty2:5051 --sitemap $2 --property text
 node ./load.js --sitemap $2 --name $1
