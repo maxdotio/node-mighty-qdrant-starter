@@ -11,7 +11,7 @@ import { MightyPool } from "node-mighty";
 const TOP_K = 10;
 const COLLECTION = "ask_life";
 const qdrant = new Qdrant("http://qdrant:6333/");
-const mighty = new MightyPool("http","mighty1",[5050],"sentence-transformers");
+const mighty = new MightyPool(["http://mighty1:5050","http://mighty2:5051"],"sentence-transformers");
 
 ///
 /// Express routes

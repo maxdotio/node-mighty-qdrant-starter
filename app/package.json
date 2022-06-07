@@ -1,7 +1,7 @@
 {
-  "name": "ask-life",
+  "name": "node-mighty-qdrant-starter",
   "version": "1.0.0",
-  "description": "Search life related questions and answers",
+  "description": "Instant Neural Search starter kit",
   "main": "app.mjs",
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "commander": "^9.1.0",
     "express": "^4.17.3",
     "html-entities": "^2.3.3",
-    "node-mighty": "^1.1.0",
+    "node-mighty": "^2.0.0",
     "progress": "^2.0.3",
     "qdrant": "^1.2.0",
     "string-strip-html": "^9.1.7",
