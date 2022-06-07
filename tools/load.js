@@ -9,7 +9,7 @@ import { Qdrant } from "qdrant";
 import { program } from "commander";
 
 //Qdrant Client
-const qdrant = new Qdrant("http://localhost:6333/");
+const qdrant = new Qdrant("http://qdrant:6333/");
 
 program
   .option('-f, --files <string>')
