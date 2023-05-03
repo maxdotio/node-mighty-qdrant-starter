@@ -51,12 +51,13 @@ const batch_size = 10;
 //Index name and schema
 const name = "ask_life";
 const schema = {
-    "name":name,
-    "vector_size": 384,
-    "distance": "Cosine",
     "hnsw_config": {
         "ef_construct":512,
         "m":32
+    },
+    "vectors": {
+        "size": 384,
+        "distance": "Cosine",
     }
 };
 
@@ -68,7 +69,7 @@ async function create_collection(DELETE) {
 
     if (DELETE && exists) {
         let delete_result = await qdrant.delete_collection(name);
-        console.log('Collection Deleted')
+        console.log('Collection Deleted');
         exists = false;
     }
     
@@ -92,10 +93,8 @@ function get_files(path) {
 }
 
 function get_documents(files,ignore) {
-    let payloads = [];
     let documents = [];
 
-    let id = 0;
     for (var i=0;i<files.length;i++) {
         let doc = JSON.parse(fs.readFileSync(files[i].filename,"utf-8"));
         if (doc && doc && doc.vectors && doc.vectors.length) {
@@ -115,30 +114,18 @@ function get_documents(files,ignore) {
             for(var j=0;j<doc.vectors.length;j++) {
                 let vec = doc.vectors[j];
                 let txt = doc.texts[j];
-                if (vec.length) {
-                    //Each document body might have been split up if it was long.
-                    //We'll create a separate point for each part of the vectorized content.
-                    for(var v=0;v<vec.length;v++) {
-                        let vector = vec[v];
-                        let text = txt[v];
-                        let docid = uuidv4();
 
-                        let payload = JSON.parse(JSON.stringify(metadata));
-                        payload.text = text.replace(/[\n]/g,"<br/>");
-                        payload.site = site;
+                let payload = JSON.parse(JSON.stringify(metadata));
+                payload.text = txt.replace(/[\n]/g,"<br/>");
+                payload.site = site;
 
-                        //Add it to the main list to be batched later
-                        documents.push({
-                            "id":docid,
-                            "vector":vector,
-                            "payload":payload
-                        });
+                let docid = uuidv4();
 
-                        //IMPORTANT - this is the Qdrant point ID and may change if the file order changes!
-                        id++;
-                    }
-                }
-                
+                documents.push({
+                    "id":docid,
+                    "vector":vec,
+                    "payload":payload
+                });
             }
         }
     }
